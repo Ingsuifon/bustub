@@ -47,6 +47,12 @@ class ClockReplacer : public Replacer {
 
  private:
   // TODO(student): implement me!
+  /** The array that record whether the frame is in replacer and if it has been used. */
+  std::vector<std::pair<bool, bool>> clock;
+  /** The clock hand. */
+  frame_id_t next = 0;
+  /** The number of frame that currently in this replacer. */
+  size_t size = 0;
 };
 
 }  // namespace bustub
