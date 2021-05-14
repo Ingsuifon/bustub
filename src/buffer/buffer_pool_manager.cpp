@@ -82,9 +82,9 @@ bool BufferPoolManager::UnpinPageImpl(page_id_t page_id, bool is_dirty) {
   if (it != page_table_.end()) {
     frame_id_t frame = it->second;
     Page *page = pages_ + frame;
+    page->is_dirty_ = page->is_dirty_ ? true : is_dirty;
     if (page->GetPinCount() <= 0) return false;
     if (--page->pin_count_ == 0) replacer_->Unpin(frame);
-    page->is_dirty_ = is_dirty;
     return true;
   }
   return false; 
@@ -121,7 +121,10 @@ Page *BufferPoolManager::NewPageImpl(page_id_t *page_id) {
     latch_.unlock();
     replacer_->Victim(&targetFrame);
   }
-  if (targetFrame == -1) return nullptr;
+  if (targetFrame == -1) {
+    *page_id = INVALID_PAGE_ID;
+    return nullptr;
+  }
   *page_id = disk_manager_->AllocatePage();
   Page *page = pages_ + targetFrame;
   if (page_table_.find(page->GetPageId()) != page_table_.end()) {
